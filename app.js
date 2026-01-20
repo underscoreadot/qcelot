@@ -85,7 +85,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
               {
                 title: `Permission denied!`,
                 description: `You do not have permission to use this command.`,
-                color: 0xff3b30
+                color: 0x55535d
               }
             ],
             flags: InteractionResponseFlags.EPHEMERAL
@@ -101,7 +101,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
               {
                 title: `Channel in use!`,
                 description: `This channel is already being used to watch queues.`,
-                color: 0xff3b30
+                color: 0x55535d
               }
             ]
           }
@@ -123,7 +123,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
             {
               title: `Started watching the queues for Farm Hunt!`,
               description: `Notifications will be sent ` + (role ? (role === everyone ? `to @everyone ` : `to <@&${role}> `) : ``) + `when the player count reaches ${countThreshold}.`,
-              color: 0xff3b30
+              color: 0xb97374
             }
           ]
         }
@@ -140,7 +140,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
               {
                 title: `Permission denied!`,
                 description: `You do not have permission to use this command.`,
-                color: 0xff3b30
+                color: 0x55535d
               }
             ],
             flags: InteractionResponseFlags.EPHEMERAL
@@ -162,7 +162,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
             {
               title: `Stopped watching the queues for Farm Hunt!`,
               description: `Notifications will no longer be sent.`,
-              color: 0xff3b30
+              color: 0xb97374
             }
           ]
         }
