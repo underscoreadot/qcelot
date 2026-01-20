@@ -1,0 +1,33 @@
+import { getCachedGameCounts } from "./hypixel.js";
+
+export async function watchQueue({ channel, role, countThreshold, everyone }) {
+  let previousCount = null;
+
+  const interval = setInterval(async () => {
+    try {
+      const games = await getCachedGameCounts();
+      const count = games.ARCADE.modes.FARM_HUNT;
+
+      if (count >= countThreshold && (previousCount === null || previousCount < countThreshold)) {
+        await channel.send({
+          content: role ? (role === everyone ? `@everyone` : `<@&${role}>`) : ` `,
+          embeds: [
+            {
+              title: `Farm Hunt is queueing!`,
+              fields: [
+                { name: `Count`, value: `${count} players`, inline: true }
+              ],
+              color: 0x5a9d12
+            }
+          ]
+        });
+      }
+
+      previousCount = count;
+    } catch (err) {
+      console.error("Error fetching queue details:", err);
+    }
+  }, 15000);
+
+  return interval;
+}

@@ -1,0 +1,32 @@
+const API_KEY = process.env.HYPIXEL_API_KEY;
+
+let games = await getGameCounts();
+
+const interval = setInterval(async () => {
+  try {
+    games = await getGameCounts();
+  } catch (err) {
+    console.error("Error fetching queue details:", err);
+  }
+}, 15000);
+
+async function getGameCounts() {
+  const res = await fetch(
+    `https://api.hypixel.net/gameCounts?key=${API_KEY}`
+  );
+
+  if (!res.ok) {
+    throw new Error(`Hypixel API error: ${res.status}`);
+  }
+
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error("Hypixel API returned success=false");
+  }
+
+  return data.games;
+}
+
+export function getCachedGameCounts() {
+    return games;
+}
