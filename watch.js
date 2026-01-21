@@ -27,7 +27,7 @@ export async function watchQueue({ channel, role, countThreshold, everyone }) {
     } catch (err) {
       console.error("Error fetching queue details:", err);
     }
-  }, 15000);
+  }, 1200);
 
   return interval;
 }

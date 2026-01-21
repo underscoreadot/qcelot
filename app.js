@@ -24,6 +24,12 @@ const client = new Client({ intents: [ 'GUILDS', 'GUILD_MESSAGES' ] });
 
 client.login(process.env.DISCORD_TOKEN);
 
+client.once('ready', () => {
+  client.user.setPresence({
+    status: 'invisible'
+  });
+});
+
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
  * Parse request body and verifies incoming requests using discord-interactions package

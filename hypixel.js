@@ -1,6 +1,12 @@
 const API_KEY = process.env.HYPIXEL_API_KEY;
 
-let games = await getGameCounts();
+let games = null;
+
+try {
+  games = await getGameCounts();
+} catch (err) {
+  console.error("Error fetching queue details:", err);
+}
 
 const interval = setInterval(async () => {
   try {
@@ -8,7 +14,7 @@ const interval = setInterval(async () => {
   } catch (err) {
     console.error("Error fetching queue details:", err);
   }
-}, 15000);
+}, 1200);
 
 async function getGameCounts() {
   const res = await fetch(
