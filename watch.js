@@ -2,13 +2,14 @@ import { getCachedGameCounts } from "./hypixel.js";
 
 export async function watchQueue({ channel, role, countThreshold, everyone }) {
   let previousCount = null;
+  let last = null;
 
   const interval = setInterval(async () => {
     try {
       const games = await getCachedGameCounts();
       const count = games.ARCADE.modes.FARM_HUNT;
 
-      if (count >= countThreshold && (previousCount === null || previousCount < countThreshold)) {
+      if (count >= countThreshold && (previousCount !== null && previousCount < countThreshold) && (!last || Date.now() - last >= 60000)) {
         await channel.send({
           content: role ? (role === everyone ? `@everyone` : `<@&${role}>`) : ` `,
           embeds: [
@@ -21,6 +22,8 @@ export async function watchQueue({ channel, role, countThreshold, everyone }) {
             }
           ]
         });
+
+        last = Date.now();
       }
 
       previousCount = count;
