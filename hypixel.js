@@ -18,7 +18,7 @@ const interval = setInterval(async () => {
 
 async function getGameCounts() {
   const res = await fetch(
-    `https://api.hypixel.net/gameCounts?key=${API_KEY}`
+    `https://api.hypixel.net/v2/counts?key=${API_KEY}`
   );
 
   if (!res.ok) {
