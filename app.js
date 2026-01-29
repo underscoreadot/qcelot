@@ -1,5 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
+import fs from 'fs';
+import path from 'path';
 import {
   ButtonStyleTypes,
   InteractionResponseFlags,
@@ -16,6 +18,7 @@ const app = express();
 // Get port, or default to 3000
 const PORT = process.env.PORT || 3000;
 // To keep track of our active games
+const WATCHERS_FILE = path.resolve('./watchers.json');
 const watchers = new Map();
 
 import pkg from 'discord.js';
@@ -24,11 +27,38 @@ const client = new Client({ intents: [ 'GUILDS', 'GUILD_MESSAGES' ] });
 
 client.login(process.env.DISCORD_TOKEN);
 
-client.once('ready', () => {
-  client.user.setPresence({
-    status: 'invisible'
-  });
+client.once('ready', async () => {
+  client.user.setPresence({ status: 'invisible' });
+  await loadWatchers();
 });
+
+function readWatcherFile() {
+  if (!fs.existsSync(WATCHERS_FILE)) return [];
+  try {
+    return JSON.parse(fs.readFileSync(WATCHERS_FILE, 'utf8'));
+  } catch (err) {
+    console.error('Failed to parse watchers file:', err);
+    return [];
+  }
+}
+
+function writeWatcherFile(data) {
+  fs.writeFileSync(WATCHERS_FILE, JSON.stringify(data, null, 2));
+}
+
+async function loadWatchers() {
+  const saved = readWatcherFile();
+
+  for (const watcher of saved) {
+    try {
+      const channel = await client.channels.fetch(watcher.channelId);
+      watchers.set(watcher.channelId, watchQueue({ channel: channel, role: watcher.role, countThreshold: watcher.countThreshold, everyone: watcher.everyone }));
+    } catch (err) {
+      console.error(`Failed to restore watcher for ${watcher.channelId}`, err);
+    }
+  }
+}
+
 
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
@@ -119,7 +149,13 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
       const channel = await client.channels.fetch(req.body.channel_id);
 
-      watchers.set(req.body.channel_id, watchQueue({ channel: channel, role: role, countThreshold: countThreshold, everyone: everyone }));
+      watchers.set(req.body.channel_id, watchQueue({ channel: channel, role, countThreshold, everyone }));
+
+      const saved = readWatcherFile();
+      if (!saved.some(watcher => watcher.channelId === req.body.channel_id)) {
+        saved.push({ channelId: req.body.channel_id, role, countThreshold, everyone });
+        writeWatcherFile(saved);
+      }
 
       // Send a message into the channel where command was triggered from
       return res.send({
@@ -159,6 +195,9 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       if (watcher) {
         clearInterval(watcher);
         watchers.delete(req.body.channel_id);
+
+        const saved = readWatcherFile().filter(watcher => watcher.channelId !== req.body.channel_id);
+        writeWatcherFile(saved);
       }
 
       return res.send({
