@@ -10,7 +10,7 @@ export async function watchQueue({ channel, role, countThreshold, delay, everyon
       const games = await getCachedGameCounts();
       const count = games.ARCADE.modes.FARM_HUNT;
 
-      if (count >= countThreshold && (Date.now() - last) >= delay * 60000 && ((previousCount !== null && previousCount < countThreshold) || ticks < 25)) ticks--;
+      if (count >= countThreshold && (Date.now() - last + 30000) >= delay * 60000 && ((previousCount !== null && previousCount < countThreshold) || ticks < 25)) ticks--;
       else ticks = 25;
 
       if (ticks === 0) {
