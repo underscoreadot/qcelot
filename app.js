@@ -52,7 +52,7 @@ async function loadWatchers() {
   for (const watcher of saved) {
     try {
       const channel = await client.channels.fetch(watcher.channelId);
-      watchers.set(watcher.channelId, watchQueue({ channel: channel, role: watcher.role, countThreshold: watcher.countThreshold, delay: watcher.delay, everyone: watcher.everyone }));
+      watchers.set(watcher.channelId, watchQueue({ channel: channel, role: watcher.role, countThreshold: watcher.countThreshold, everyone: watcher.everyone }));
     } catch (err) {
       console.error(`Failed to restore watcher for ${watcher.channelId}`, err);
     }
@@ -146,14 +146,13 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
       const role = data.options?.find(o => o.name === 'role')?.value;
       const countThreshold = data.options?.find(o => o.name === 'count')?.value || 11;
-      const delay = data.options?.find(o => o.name === 'delay')?.value || 10;
 
       const channel = await client.channels.fetch(req.body.channel_id);
 
-      watchers.set(req.body.channel_id, watchQueue({ channel: channel, role, countThreshold, delay, everyone }));
+      watchers.set(req.body.channel_id, watchQueue({ channel: channel, role, countThreshold, everyone }));
       const saved = readWatcherFile();
       if (!saved.some(watcher => watcher.channelId === req.body.channel_id)) {
-        saved.push({ channelId: req.body.channel_id, role, countThreshold, delay, everyone });
+        saved.push({ channelId: req.body.channel_id, role, countThreshold, everyone });
         writeWatcherFile(saved);
       }
 

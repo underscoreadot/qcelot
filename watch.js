@@ -1,34 +1,42 @@
 import { getCachedGameCounts } from "./hypixel.js";
 
-export async function watchQueue({ channel, role, countThreshold, delay, everyone }) {
+export async function watchQueue({ channel, role, countThreshold, everyone }) {
   let previousCount = null;
   let ticks = 25;
-  let last = Date.now() - delay * 60000;
+  let queued = false;
 
   const interval = setInterval(async () => {
     try {
       const games = await getCachedGameCounts();
       const count = games.ARCADE.modes.FARM_HUNT;
 
-      if (count >= countThreshold && (Date.now() - last + 30000) >= delay * 60000 && ((previousCount !== null && previousCount < countThreshold) || ticks < 25)) ticks--;
-      else ticks = 25;
+      if (!queued) {
+        if (count >= countThreshold && ((previousCount !== null && previousCount < countThreshold) || ticks < 25)) ticks--;
+        else ticks = 25;
 
-      if (ticks === 0) {
-        await channel.send({
-          content: role ? (role === everyone ? `@everyone` : `<@&${role}>`) : ` `,
-          embeds: [
-            {
-              title: `Farm Hunt is queueing!`,
-              fields: [
-                { name: `Count`, value: `${count} players`, inline: true }
-              ],
-              color: 0x5a9d12
-            }
-          ]
-        });
+        if (ticks === 0) {
+          await channel.send({
+            content: role ? (role === everyone ? `@everyone` : `<@&${role}>`) : ` `,
+            embeds: [
+              {
+                title: `Farm Hunt is queueing!`,
+                fields: [
+                  { name: `Count`, value: `${count} players`, inline: true }
+                ],
+                color: 0x5a9d12
+              }
+            ]
+          });
 
-        ticks = 25;
-        last = Date.now();
+          ticks = 25;
+          queued = true;
+        }
+      }
+      else {
+        if (count < countThreshold && (previousCount >= countThreshold || ticks > 0)) ticks += 0.5;
+        else ticks = 0;
+
+        if (ticks >= 25) queued = false;
       }
 
       previousCount = count;
