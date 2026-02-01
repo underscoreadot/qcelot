@@ -1,17 +1,25 @@
 import { getCachedGameCounts } from "./hypixel.js";
 
 export async function watchQueue({ channel, role, countThreshold, everyone }) {
-  let previousCount = null;
-  let ticks = 25;
-  let queued = false;
+  let ticks = 0;
+  let queued = true;
 
   const interval = setInterval(async () => {
     try {
       const games = await getCachedGameCounts();
       const count = games.ARCADE.modes.FARM_HUNT;
 
-      if (!queued) {
-        if (count >= countThreshold && ((previousCount !== null && previousCount < countThreshold) || ticks < 25)) ticks--;
+      if (queued) {
+        if (count < countThreshold) ticks++;
+        else ticks = 0;
+
+        if (ticks >= 50) {
+          ticks = 25;
+          queued = false;
+        }
+      }
+      else {
+        if (count >= countThreshold) ticks--;
         else ticks = 25;
 
         if (ticks <= 0) {
@@ -32,17 +40,6 @@ export async function watchQueue({ channel, role, countThreshold, everyone }) {
           queued = true;
         }
       }
-      else {
-        if (count < countThreshold) ticks++;
-        else ticks = 0;
-
-        if (ticks >= 50) {
-          ticks = 25;
-          queued = false;
-        }
-      }
-
-      previousCount = count;
     } catch (err) {
       console.error("Error fetching queue details:", err);
     }
