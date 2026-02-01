@@ -14,7 +14,7 @@ export async function watchQueue({ channel, role, countThreshold, everyone }) {
         if (count >= countThreshold && ((previousCount !== null && previousCount < countThreshold) || ticks < 25)) ticks--;
         else ticks = 25;
 
-        if (ticks === 0) {
+        if (ticks <= 0) {
           await channel.send({
             content: role ? (role === everyone ? `@everyone` : `<@&${role}>`) : ` `,
             embeds: [
@@ -28,15 +28,18 @@ export async function watchQueue({ channel, role, countThreshold, everyone }) {
             ]
           });
 
-          ticks = 25;
+          ticks = 0;
           queued = true;
         }
       }
       else {
-        if (count < countThreshold && (previousCount >= countThreshold || ticks > 0)) ticks += 0.5;
+        if (count < countThreshold) ticks++;
         else ticks = 0;
 
-        if (ticks >= 25) queued = false;
+        if (ticks >= 50) {
+          ticks = 25;
+          queued = false;
+        }
       }
 
       previousCount = count;
