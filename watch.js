@@ -13,7 +13,7 @@ export async function watchQueue({ channel, role, countThreshold, everyone }) {
         if (count < countThreshold) ticks++;
         else ticks = 0;
 
-        if (ticks >= 50) {
+        if (ticks >= 250) {
           ticks = 25;
           queued = false;
         }
