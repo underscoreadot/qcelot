@@ -14,7 +14,7 @@ const interval = setInterval(async () => {
   } catch (err) {
     console.error("Error fetching queue details:", err);
   }
-}, 1200);
+}, 1500);
 
 async function getGameCounts() {
   const res = await fetch(
