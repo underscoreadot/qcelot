@@ -17,14 +17,14 @@ export async function watchQueue({ channel, role, countThreshold, delay, everyon
         if (count < countThreshold) ticks++;
         else ticks = 0;
 
-        if (ticks >= 50 * delay) {
-          ticks = 25;
+        if (ticks >= 40 * delay) {
+          ticks = 20;
           queued = false;
         }
       }
       else {
         if (count >= countThreshold) ticks--;
-        else ticks = 25;
+        else ticks = 20;
 
         if (ticks <= 0) {
           await channel.send({
