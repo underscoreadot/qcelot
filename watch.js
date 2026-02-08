@@ -1,6 +1,6 @@
 import { getCachedGameCounts } from "./hypixel.js";
 
-export async function watchQueue({ channel, role, countThreshold, everyone }) {
+export async function watchQueue({ channel, role, countThreshold, delay, everyone }) {
   let ticks = 0;
   let queued = true;
 
@@ -13,7 +13,7 @@ export async function watchQueue({ channel, role, countThreshold, everyone }) {
         if (count < countThreshold) ticks++;
         else ticks = 0;
 
-        if (ticks >= 250) {
+        if (ticks >= 50 * delay) {
           ticks = 25;
           queued = false;
         }
@@ -27,7 +27,7 @@ export async function watchQueue({ channel, role, countThreshold, everyone }) {
             content: role ? (role === everyone ? `@everyone` : `<@&${role}>`) : ` `,
             embeds: [
               {
-                title: `Farm Hunt is queueing!`,
+                title: `Farm Hunt is ` + (count < 11 ? `not ` : ``) + `queueing!`,
                 fields: [
                   { name: `Count`, value: `${count} players`, inline: true }
                 ],

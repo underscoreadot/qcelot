@@ -25,6 +25,12 @@ const WATCH_COMMAND = {
       description: 'Role to ping',
       required: false
     },
+    {
+      type: 4,
+      name: 'delay',
+      description: 'Delay before attempting to send another notification (in minutes)',
+      required: false
+    },
   ],
   type: 1,
   default_member_permissions: (1n << 5n).toString(),
