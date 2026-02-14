@@ -26,6 +26,9 @@ export const defaults = new Map();
 export const watchers = new Map();
 
 export function addDefault(scopeId, mode, game) {
+  if (!defaults.has(scopeId)) defaults.set(scopeId, new Map());
+  defaults.get(scopeId).set(mode, game);
+
   database.prepare(`
     INSERT OR REPLACE INTO defaults (scopeId, mode, game)
     VALUES (?, ?, ?)
@@ -33,6 +36,8 @@ export function addDefault(scopeId, mode, game) {
 }
 
 export function removeDefault(scopeId, mode) {
+  defaults.get(scopeId)?.delete(mode);
+
   database.prepare('DELETE FROM defaults WHERE scopeId = ? AND mode = ?').run(scopeId, mode);
 }
 
@@ -48,6 +53,8 @@ export async function loadDefaults() {
 }
 
 export function addWatcher(channelId, mode, game, role, everyone, countThreshold, delay) {
+  watchers.set(channelId, { game, interval: watchQueue(channelId, mode, game, role, everyone, countThreshold, delay) });
+
   database.prepare(`
     INSERT OR REPLACE INTO watchers (channelId, mode, game, role, everyone, countThreshold, delay)
     VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -55,6 +62,14 @@ export function addWatcher(channelId, mode, game, role, everyone, countThreshold
 }
 
 export function removeWatcher(channelId) {
+  const watcher = watchers.get(channelId);
+
+  if (watcher) {
+    clearInterval(watcher.interval);
+
+    watchers.delete(channelId);
+  }
+
   database.prepare('DELETE FROM watchers WHERE channelId = ?').run(channelId);
 }
 

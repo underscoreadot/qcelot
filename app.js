@@ -7,7 +7,6 @@ import { modesMap, games, gamesMap } from './data.js';
 import { getCachedGameCount } from "./hypixel.js";
 import { watchers, defaults, addWatcher, removeWatcher, loadWatchers, addDefault, removeDefault, loadDefaults } from './state.js';
 import { queueMessage, PERMISSION_DENIED, CHANNEL_IN_USE, CHANNEL_NOT_IN_USE, INVALID_GAME, NO_GAME_SELECTED, STARTED_WATCHING, STOPPED_WATCHING, DEFAULT_SET, DEFAULT_RESET } from './messages.js';
-import { watchQueue } from './watch.js';
 
 // Create an express app
 const app = express();
@@ -86,26 +85,14 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       const gameObject = gamesMap.get(mode).get(game);
       
       const scopeId = req.body.guild_id || req.body.channel_id;
-      let scopeDefaults = defaults.get(scopeId);
 
       if (!game) {
-        if (scopeDefaults) {
-          scopeDefaults.delete(mode);
-
-          removeDefault(scopeId, mode);
-        }
+        removeDefault(scopeId, mode);
 
         return res.send(DEFAULT_RESET(modeObject.name));
       }
 
       if (!gameObject) return res.send(INVALID_GAME);
-
-      if (!scopeDefaults) {
-        scopeDefaults = new Map();
-        defaults.set(scopeId, scopeDefaults);
-      }
-
-      scopeDefaults.set(mode, game);
 
       addDefault(scopeId, mode, game);
 
@@ -139,7 +126,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
     if (name === 'watch') {
       if (req.body.member && !(BigInt(req.body.member.permissions) & 1n << 5n)) return res.send(PERMISSION_DENIED);
 
-      if (watchers.get(req.body.channel_id)) return res.send(CHANNEL_IN_USE);
+      if (watchers.has(req.body.channel_id)) return res.send(CHANNEL_IN_USE);
 
       const subcommand = options[0];
 
@@ -158,8 +145,6 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
       const everyone = role === req.body.guild?.id;
 
-      watchers.set(req.body.channel_id, { game, interval: watchQueue(req.body.channel_id, mode, game, role, everyone, countThreshold, delay) });
-
       addWatcher(req.body.channel_id, mode, game, role, everyone, countThreshold, delay);
 
       return res.send(STARTED_WATCHING(gameObject.name, role, everyone, countThreshold));
@@ -171,17 +156,11 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
       const watcher = watchers.get(req.body.channel_id);
 
-      if (watcher) {
-        clearInterval(watcher.interval);
-        
-        watchers.delete(req.body.channel_id);
+      if (!watcher) return res.send(CHANNEL_NOT_IN_USE);
 
-        removeWatcher(req.body.channel_id);
+      removeWatcher(req.body.channel_id);
 
-        return res.send(STOPPED_WATCHING(watcher.game));
-      }
-
-      return res.send(CHANNEL_NOT_IN_USE);
+      return res.send(STOPPED_WATCHING(watcher.game));
     }
 
     console.error(`unknown command: ${name}`);
