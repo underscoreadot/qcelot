@@ -31,7 +31,7 @@ function createModeSubcommands(globalOptions, default_member_permissions, contex
 const DEFAULT_COMMAND = {
   name: 'default',
   description: 'Set a default game',
-  options: createModeSubcommands([], (1n << 5n).toString(), [0, 1], `Set a default game for `, ``, `Game to set as default`),
+  options: createModeSubcommands([], (1n << 5n).toString(), [0, 1, 2], `Set a default game for `, ``, `Game to set as default`),
 };
 
 const CHECK_COMMAND = {
