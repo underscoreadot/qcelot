@@ -4,7 +4,7 @@ import { InteractionResponseType, InteractionType, verifyKeyMiddleware } from 'd
 import { watchQueue } from './watch.js';
 import { getCachedGameCount } from "./hypixel.js";
 import { modesMap, games, gamesMap } from './data.js';
-import { watchers, defaults, readWatcherFile, writeWatcherFile, loadWatchers, readDefaultsFile, writeDefaultsFile, loadDefaults } from './state.js';
+import { watchers, defaults, addWatcher, removeWatcher, loadWatchers, addDefault, removeDefault, loadDefaults } from './state.js';
 import { queueMessage, PERMISSION_DENIED, CHANNEL_IN_USE, CHANNEL_NOT_IN_USE, INVALID_GAME, NO_GAME_SELECTED, STARTED_WATCHING, STOPPED_WATCHING, DEFAULT_SET, DEFAULT_RESET } from './messages.js';
 
 // Create an express app
@@ -23,9 +23,6 @@ client.once('ready', async () => {
   await loadWatchers(client);
   await loadDefaults();
 });
-
-let savedWatchers = readWatcherFile();
-let savedDefaults = readDefaultsFile();
 
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
@@ -89,18 +86,12 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       
       const scopeId = req.body.guild_id || req.body.channel_id;
       let scopeDefaults = defaults.get(scopeId);
-      
-      let entry = savedDefaults.find(e => e.scopeId === scopeId);
 
       if (!game) {
         if (scopeDefaults) {
           scopeDefaults.delete(mode);
 
-          delete entry.modes[mode];
-
-          if (Object.keys(entry.modes).length === 0) savedDefaults.splice(savedDefaults.indexOf(entry), 1);
-
-          writeDefaultsFile(savedDefaults);
+          removeDefault(scopeId, mode);
         }
 
         return res.send(DEFAULT_RESET(modeObject.name));
@@ -115,14 +106,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
       scopeDefaults.set(mode, game);
 
-      if (!entry) {
-        entry = { scopeId, modes: {} };
-        savedDefaults.push(entry);
-      }
-
-      entry.modes[mode] = game;
-
-      writeDefaultsFile(savedDefaults);
+      addDefault(scopeId, mode, game);
 
       return res.send(DEFAULT_SET(modeObject.name, gameObject.name));
     }
@@ -175,14 +159,9 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
       const channel = await client.channels.fetch(req.body.channel_id);
 
-      watchers.set(req.body.channel_id, {
-        mode,
-        game,
-        interval: watchQueue(channel, mode, game, role, everyone, countThreshold, delay)
-      });
+      watchers.set(req.body.channel_id, { game, interval: watchQueue(channel, mode, game, role, everyone, countThreshold, delay) });
 
-      savedWatchers.push({ channelId: req.body.channel_id, mode, game, role, everyone, countThreshold, delay });
-      writeWatcherFile(savedWatchers);
+      addWatcher(req.body.channel_id, mode, game, role, everyone, countThreshold, delay);
 
       return res.send(STARTED_WATCHING(gameObject.name, role, everyone, countThreshold));
     }
@@ -198,10 +177,9 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
         
         watchers.delete(req.body.channel_id);
 
-        savedWatchers = savedWatchers.filter(w => w.channelId !== req.body.channel_id);
-        writeWatcherFile(savedWatchers);
+        removeWatcher(req.body.channel_id);
 
-        return res.send(STOPPED_WATCHING(gamesMap.get(watcher.mode).get(watcher.game).name));
+        return res.send(STOPPED_WATCHING(watcher.game));
       }
 
       return res.send(CHANNEL_NOT_IN_USE);
