@@ -14,7 +14,7 @@ Create a `.env` file containing your app ID (`APP_ID`), bot token (`DISCORD_TOKE
 ```
 npm run register 
 ```
-Then start the bot with:
+Start the bot with:
 ```
 npm run start
 ```
