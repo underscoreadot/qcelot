@@ -2,24 +2,7 @@
 A Discord queue tracker and notifier for games on the Hypixel network!
 
 ## Installation
-Qcelot requires Node.js v18 or later. Consult the [Discord Developer Documentation](https://docs.discord.com/developers/intro) for guidance on setting up your bot and interaction endpoint.
-
-Clone the repository and install dependencies with:
-```
-git clone https://github.com/Qcelot/qcelot.git
-cd qcelot
-npm install
-```
-Create a `.env` file containing your app ID (`APP_ID`), bot token (`DISCORD_TOKEN`), public key (`PUBLIC_KEY`), and Hypixel API key (`HYPIXEL_API_KEY`).
-
-Install slash commands using:
-```
-npm run register 
-```
-Then start the bot with:
-```
-npm run start
-```
+Qcelot requires Node.js v18 or later. Consult the [Discord Developer Documentation](https://docs.discord.com/developers/quick-start/getting-started) for information on creating and setting up an application. A Hypixel API key (`HYPIXEL_API_KEY`) is also required and must be supplied in your `.env` file.
 
 ## Contributing
 Contributions are welcome! Please fork the repository and submit a pull request.
