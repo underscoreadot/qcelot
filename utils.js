@@ -5,7 +5,9 @@ export function buildFormData(payload, filePath, fileName) {
   const form = new FormData();
 
   form.append('payload_json', JSON.stringify(payload));
-  form.append('files[0]', new Blob([readFileSync(filePath)], { type: 'image/png' }), fileName);
+  try {
+    form.append('files[0]', new Blob([readFileSync(filePath)], { type: 'image/png' }), fileName);
+  } catch { }
     
   return form;
 }
