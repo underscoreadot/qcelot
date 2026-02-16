@@ -9,7 +9,7 @@ function queueMessageContent(role, everyone, gameObject, count) {
         title: `${gameObject.name} is ` + (count < gameObject.count ? `not ` : ``) + `queueing`,
         fields: [
           { name: `Count`, value: `${count} player` + (count !== 1 ? `s` : ``), inline: true },
-          { name: `Threshold`, value: `${gameObject.count} player` + (gameObject.count !== 1 ? `s` : ``), inline: true }
+          ...(count < gameObject.count ? [{ name: `Threshold`, value: `${gameObject.count} player` + (gameObject.count !== 1 ? `s` : ``), inline: true }] : [])
         ],
         thumbnail: { url: `attachment://${gameObject.icon}.png` },
         color: (count < gameObject.count ? 0xb0b0b0 : 0x5d9d15)
