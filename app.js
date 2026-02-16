@@ -6,7 +6,8 @@ import { Client, GatewayIntentBits } from 'discord.js';
 import { modesMap, games, gamesMap } from './data.js';
 import { getCachedGameCount } from "./hypixel.js";
 import { addDefault, removeDefault, getDefault, loadDefaults, addWatcher, removeWatcher, getWatcher, loadWatchers } from './state.js';
-import { queueMessage, CHANNEL_IN_USE, CHANNEL_NOT_IN_USE, INVALID_GAME, NO_GAME_SELECTED, STARTED_WATCHING, STOPPED_WATCHING, DEFAULT_SET, DEFAULT_RESET } from './messages.js';
+import { queueInteractionMessage, CHANNEL_IN_USE, CHANNEL_NOT_IN_USE, INVALID_GAME, NO_GAME_SELECTED, STARTED_WATCHING, STOPPED_WATCHING, DEFAULT_SET, DEFAULT_RESET } from './messages.js';
+import { sendFormData } from "./utils.js";
 
 // Create an express app
 const app = express();
@@ -87,14 +88,14 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       if (!game) {
         removeDefault(scopeId, mode);
 
-        return res.send(DEFAULT_RESET(modeObject.name));
+        return await sendFormData(res, DEFAULT_RESET(modeObject.name));
       }
 
-      if (!gameObject) return res.send(INVALID_GAME(game));
+      if (!gameObject) return await sendFormData(res, INVALID_GAME(game));
 
       addDefault(scopeId, mode, game);
 
-      return res.send(DEFAULT_SET(modeObject.name, gameObject.name));
+      return await sendFormData(res, DEFAULT_SET(modeObject.name, gameObject.name));
     }
 
     // "check" command
@@ -106,36 +107,33 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
       const modeObject = modesMap.get(mode);
 
-      if (!game) return res.send(NO_GAME_SELECTED(modeObject.name));
+      if (!game) return await sendFormData(res, NO_GAME_SELECTED(modeObject.name));
 
       const gameObject = gamesMap.get(mode).get(game);
 
-      if (!gameObject) return res.send(INVALID_GAME(game));
+      if (!gameObject) return await sendFormData(res, INVALID_GAME(game));
 
       const count = getCachedGameCount(modeObject.api, gameObject.api);
 
-      return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: queueMessage(null, false, gameObject, count)
-      });
+      return await sendFormData(res, queueInteractionMessage(null, false, gameObject, count));
     }
 
     // "watch" command
     if (name === 'watch') {
       const watcher = getWatcher(req.body.channel_id)
 
-      if (watcher) return res.send(CHANNEL_IN_USE(watcher.game));
+      if (watcher) return await sendFormData(res, CHANNEL_IN_USE(watcher.game));
 
       const subcommand = options[0];
 
       const mode = subcommand.name;
       const game = subcommand.options?.find(o => o.name === 'game')?.value || getDefault(req.body.guild_id || req.body.channel_id, mode);
 
-      if (!game) return res.send(NO_GAME_SELECTED(modesMap.get(mode).name));
+      if (!game) return await sendFormData(res, NO_GAME_SELECTED(modesMap.get(mode).name));
 
       const gameObject = gamesMap.get(mode).get(game);
 
-      if (!gameObject) return res.send(INVALID_GAME(game));
+      if (!gameObject) return await sendFormData(res, INVALID_GAME(game));
       
       const role = subcommand.options?.find(o => o.name === 'role')?.value;
       const countThreshold = subcommand.options?.find(o => o.name === 'count')?.value || gameObject.count;
@@ -145,18 +143,18 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
       addWatcher(req.body.channel_id, mode, game, role, everyone, countThreshold, delay);
 
-      return res.send(STARTED_WATCHING(gameObject.name, countThreshold));
+      return await sendFormData(res, STARTED_WATCHING(gameObject.name, countThreshold));
     }
 
     // "unwatch" command
     if (name === 'unwatch') {
       const watcher = getWatcher(req.body.channel_id);
 
-      if (!watcher) return res.send(CHANNEL_NOT_IN_USE);
+      if (!watcher) return await sendFormData(res, CHANNEL_NOT_IN_USE);
 
       removeWatcher(req.body.channel_id);
 
-      return res.send(STOPPED_WATCHING(watcher.game));
+      return await sendFormData(res, STOPPED_WATCHING(watcher.game));
     }
 
     console.error(`unknown command: ${name}`);
