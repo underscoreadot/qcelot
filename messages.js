@@ -69,5 +69,5 @@ function statusMessage(title, description, icon) {
 
 export const STARTED_WATCHING = (game, countThreshold) => statusMessage(`Watching ${game}`, `This channel will receive notifications for **${game}** when the player count reaches **${countThreshold}**.`, `clock`);
 export const STOPPED_WATCHING = (game) => statusMessage(`No longer watching ${game}`, `This channel will no longer receive notifications for **${game}**.`, `clock`);
-export const DEFAULT_SET = (modeObject, game) => defaultMessage(`Default set for ${modeObject.name}`, `The default game for **${modeObject.name}** has been set to **${game}**.`, modeObject.icon);
-export const DEFAULT_RESET = (modeObject) => defaultMessage(`Default reset for ${modeObject.name}`, `The default game for **${modeObject.name}** has been reset.`, modeObject.icon);
+export const DEFAULT_SET = (modeObject, game) => statusMessage(`Default set for ${modeObject.name}`, `The default game for **${modeObject.name}** has been set to **${game}**.`, modeObject.icon);
+export const DEFAULT_RESET = (modeObject) => statusMessage(`Default reset for ${modeObject.name}`, `The default game for **${modeObject.name}** has been reset.`, modeObject.icon);
