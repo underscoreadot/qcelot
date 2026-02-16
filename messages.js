@@ -9,7 +9,6 @@ export function queueMessage(role, everyone, gameObject, count) {
         fields: [
           { name: `Count`, value: `${count} player` + (count !== 1 ? `s` : ``), inline: true }
         ],
-        thumbnail: { url: `https://raw.githubusercontent.com/Qcelot/qcelot/main/assets/icons/${gameObject.icon}.png` },
         color: (count < gameObject.count ? 0x99aab5 : 0x57f287)
       }
     ]
@@ -24,7 +23,6 @@ function errorMessage(title, description) {
         {
           title: title,
           description: description,
-          thumbnail: { url: `https://raw.githubusercontent.com/Qcelot/qcelot/main/assets/icons/barrier.png` },
           color: 0xed4245
         }
       ],
@@ -46,7 +44,6 @@ function watchMessage(title, description) {
         {
           title: title,
           description: description,
-          thumbnail: { url: `https://raw.githubusercontent.com/Qcelot/qcelot/main/assets/icons/clock.png` },
           color: 0xfee75c
         }
       ]
@@ -65,7 +62,6 @@ function defaultMessage(title, description) {
         {
           title: title,
           description: description,
-          thumbnail: { url: `https://raw.githubusercontent.com/Qcelot/qcelot/main/assets/icons/book_writable.png` },
           color: 0xeb459e
         }
       ]
