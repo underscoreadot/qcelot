@@ -58,7 +58,8 @@ const WATCH_COMMAND = {
       type: 4,
       name: 'count',
       description: 'Player count threshold to trigger a notification',
-      required: false
+      required: false,
+      min_value: 1
     },
     {
       type: 8,
@@ -70,7 +71,8 @@ const WATCH_COMMAND = {
       type: 4,
       name: 'delay',
       description: 'Delay before attempting to send another notification (in minutes)',
-      required: false
+      required: false,
+      min_value: 1
     },
   ], `Track the player counts for `, ` and receive notifications when a game queues`, `Game to track`),
   default_member_permissions: (1n << 5n).toString(),
