@@ -53,42 +53,40 @@ const CHECK_COMMAND = {
 const WATCH_COMMAND = {
   name: 'watch',
   description: 'Track the player count and receive notifications when a game queues',
-  options: createModeSubcommands([
+  options: [
+    ...createModeSubcommands([
+      {
+        type: 4,
+        name: 'count',
+        description: 'Player count threshold to trigger a notification',
+        required: false,
+        min_value: 1
+      },
+      {
+        type: 4,
+        name: 'delay',
+        description: 'Delay before attempting to send another notification (in minutes)',
+        required: false,
+        min_value: 1
+      },
+      {
+        type: 8,
+        name: 'role',
+        description: 'Role to ping',
+        required: false
+      },
+    ], `Track the player counts for `, ` and receive notifications when a game queues`, `Game to track`),
     {
-      type: 4,
-      name: 'count',
-      description: 'Player count threshold to trigger a notification',
-      required: false,
-      min_value: 1
-    },
-    {
-      type: 8,
-      name: 'role',
-      description: 'Role to ping',
-      required: false
-    },
-    {
-      type: 4,
-      name: 'delay',
-      description: 'Delay before attempting to send another notification (in minutes)',
-      required: false,
-      min_value: 1
-    },
-  ], `Track the player counts for `, ` and receive notifications when a game queues`, `Game to track`),
+      type: 1,
+      name: 'stop',
+      description: 'Stop tracking player counts'
+    }
+  ],
   default_member_permissions: (1n << 5n).toString(),
   integration_types: [0],
   contexts: [0, 1],
 };
 
-const UNWATCH_COMMAND = {
-  name: 'unwatch',
-  description: 'Stop tracking the player counts',
-  type: 1,
-  default_member_permissions: (1n << 5n).toString(),
-  integration_types: [0],
-  contexts: [0, 1],
-};
-
-const ALL_COMMANDS = [HELP_COMMAND, DEFAULT_COMMAND, CHECK_COMMAND, WATCH_COMMAND, UNWATCH_COMMAND];
+const ALL_COMMANDS = [HELP_COMMAND, DEFAULT_COMMAND, CHECK_COMMAND, WATCH_COMMAND];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);

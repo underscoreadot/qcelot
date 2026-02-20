@@ -4,7 +4,7 @@ import { InteractionResponseType, InteractionType, verifyKeyMiddleware } from 'd
 
 import { modesMap, gamesChoices, gamesMap } from './data.js';
 import { getCachedGameCount } from "./hypixel.js";
-import { isUserPremium, isUserBlacklisted, addDefault, removeDefault, getDefault, addWatcher, removeWatcher, getWatcher, getWatcherGame, getWatcherCount, loadWatchers } from './state.js';
+import { isUserPremium, isUserBlacklisted, addDefault, removeDefault, getDefault, addWatcher, removeWatcher, getWatcherGame, getWatcherCount, loadWatchers } from './state.js';
 import { queueInteractionMessage, HELP, USER_BLACKLISTED, GUILD_WATCHER_LIMIT, CHANNEL_IN_USE, CHANNEL_NOT_IN_USE, INVALID_GAME, NO_GAME_SELECTED, STARTED_WATCHING, STOPPED_WATCHING, DEFAULT_SET, DEFAULT_RESET } from './messages.js';
 import { sendFormData } from "./utils.js";
 
@@ -114,13 +114,21 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
     // "watch" command
     if (name === 'watch') {
-      if (guild_id && getWatcherCount(guild_id) >= 3 && !isUserPremium(userId)) return await sendFormData(res, GUILD_WATCHER_LIMIT);
+      const subcommand = options[0];
 
       const watcherGame = getWatcherGame(channel_id);
 
-      if (watcherGame) return await sendFormData(res, CHANNEL_IN_USE(gamesMap.get(watcherGame.mode).get(watcherGame.game).name));
+      if (subcommand.name === 'stop') {
+        if (!watcherGame) return await sendFormData(res, CHANNEL_NOT_IN_USE);
 
-      const subcommand = options[0];
+        removeWatcher(channel_id);
+
+        return await sendFormData(res, STOPPED_WATCHING(gamesMap.get(watcherGame.mode).get(watcherGame.game).name));
+      }
+
+      if (guild_id && getWatcherCount(guild_id) >= 3 && !isUserPremium(userId)) return await sendFormData(res, GUILD_WATCHER_LIMIT);
+
+      if (watcherGame) return await sendFormData(res, CHANNEL_IN_USE(gamesMap.get(watcherGame.mode).get(watcherGame.game).name));
 
       const mode = subcommand.name;
       const game = subcommand.options?.find(o => o.name === 'game')?.value ?? getDefault(guild_id ?? channel_id, mode);
@@ -131,28 +139,15 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
       if (!gameObject) return await sendFormData(res, INVALID_GAME(game));
 
-      const role = subcommand.options?.find(o => o.name === 'role')?.value;
       const countThreshold = subcommand.options?.find(o => o.name === 'count')?.value ?? gameObject.count;
       const delay = subcommand.options?.find(o => o.name === 'delay')?.value ?? 5;
+      const role = subcommand.options?.find(o => o.name === 'role')?.value;
 
       const everyone = guild_id && role === guild_id;
 
       addWatcher(channel_id, userId, guild_id, mode, game, role, everyone, countThreshold, delay);
 
       return await sendFormData(res, STARTED_WATCHING(gameObject.name, countThreshold, delay));
-    }
-
-    // "unwatch" command
-    if (name === 'unwatch') {
-      const watcher = getWatcher(channel_id);
-
-      if (!watcher) return await sendFormData(res, CHANNEL_NOT_IN_USE);
-
-      const watcherGame = getWatcherGame(channel_id);
-
-      removeWatcher(channel_id);
-
-      return await sendFormData(res, STOPPED_WATCHING(gamesMap.get(watcherGame.mode).get(watcherGame.game).name));
     }
 
     console.error(`unknown command: ${name}`);

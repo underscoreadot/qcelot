@@ -73,10 +73,6 @@ export function removeWatcher(channelId) {
   database.prepare('DELETE FROM watchers WHERE channelId = ?').run(channelId);
 }
 
-export function getWatcher(channelId) {
-  return watchers.get(channelId);
-}
-
 export function getWatcherGame(channelId) {
   return database.prepare('SELECT mode, game FROM watchers WHERE channelId = ?').get(channelId);
 }
