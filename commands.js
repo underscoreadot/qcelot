@@ -65,8 +65,7 @@ const WATCH_COMMAND = {
       type: 8,
       name: 'role',
       description: 'Role to ping',
-      required: false,
-      channel_types: [0, 2, 4, 5, 10, 11, 12, 13, 14, 15, 16]
+      required: false
     },
     {
       type: 4,
