@@ -32,17 +32,31 @@ export function watchQueue(channelId, mode, game, role, everyone, countThreshold
         else ticks = 20;
 
         if (ticks <= 0) {
-          await DiscordRequest(`channels/${channelId}/messages`, {
-            method: 'POST',
-            body: queueMessage(role, everyone, gameObject, count)
-          });
+          try {
+            await DiscordRequest(`channels/${channelId}/messages`, {
+              method: 'POST',
+              body: queueMessage(role, everyone, gameObject, count)
+            });
+          } catch (err) {
+            if (err.message) {
+              try {
+                const errorData = JSON.parse(err.message);
+                if (errorData.code === 10003 || errorData.code === 50001) {
+                  removeWatcher(channelId);
+                  return;
+                }
+              } catch {}
+            }
+
+            throw err;
+          }
 
           ticks = 0;
           queued = true;
         }
       }
     } catch (err) {
-      console.error("Error fetching queue details:", err);
+      console.error("Error in watcher loop:", err);
     } finally {
       running = false;
     }
