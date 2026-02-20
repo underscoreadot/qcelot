@@ -74,7 +74,6 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       const game = subcommand.options?.find(o => o.name === 'game')?.value;
 
       const modeObject = modesMap.get(mode);
-      const gameObject = gamesMap.get(mode).get(game);
       
       const scopeId = guild_id ?? channel_id;
 
@@ -84,6 +83,8 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
         return await sendFormData(res, DEFAULT_RESET(modeObject));
       }
 
+      const gameObject = gamesMap.get(mode).get(game);
+      
       if (!gameObject) return await sendFormData(res, INVALID_GAME(game));
 
       addDefault(scopeId, mode, game);
