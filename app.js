@@ -126,7 +126,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
         return await sendFormData(res, STOPPED_WATCHING(gamesMap.get(watcherGame.mode).get(watcherGame.game).name));
       }
 
-      if (guild_id && getWatcherCount(guild_id) >= 3 && !isUserPremium(userId)) return await sendFormData(res, GUILD_WATCHER_LIMIT);
+      if (guild_id && !isUserPremium(userId) && getWatcherCount(guild_id) >= 3) return await sendFormData(res, GUILD_WATCHER_LIMIT);
 
       if (watcherGame) return await sendFormData(res, CHANNEL_IN_USE(gamesMap.get(watcherGame.mode).get(watcherGame.game).name));
 

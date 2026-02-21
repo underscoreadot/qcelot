@@ -2,7 +2,7 @@ const API_KEY = process.env.HYPIXEL_API_KEY;
 
 let games = null;
 
-const interval = setInterval(async () => {
+setInterval(async () => {
   try {
     games = await getGameCounts();
   } catch (err) {

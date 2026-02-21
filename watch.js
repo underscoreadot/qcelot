@@ -12,7 +12,7 @@ export function watchQueue(channelId, mode, game, role, everyone, countThreshold
   let queued = true;
   let running = false;
 
-  const interval = setInterval(async () => {
+  return setInterval(async () => {
     if (running) return;
     running = true;
 
@@ -62,6 +62,4 @@ export function watchQueue(channelId, mode, game, role, everyone, countThreshold
       running = false;
     }
   }, 1500);
-
-  return interval;
 }
