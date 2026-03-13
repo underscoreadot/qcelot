@@ -1,31 +1,50 @@
 import { InteractionResponseFlags, InteractionResponseType } from 'discord-interactions';
 import { buildFormData } from './utils.js';
 
-function queueMessageContent(role, everyone, gameObject, count) {
+function queueMessageContent(role, everyone, mode, gameObject, count, timestamp, range) {
   return {
     content: role ? (everyone ? `@everyone` : `<@&${role}>`) : undefined,
     embeds: [
       {
-        title: `${gameObject.name} is ` + (count < gameObject.count ? `not ` : ``) + `queueing`,
+        title: `${gameObject.name} ` + (timestamp ? `was ` : `is `) + (count < gameObject.count ? `not ` : ``) + `queueing`,
         fields: [
           { name: `Count`, value: `${count} player` + (count !== 1 ? `s` : ``), inline: true },
           ...(count < gameObject.count ? [{ name: `Threshold`, value: `${gameObject.count} player` + (gameObject.count !== 1 ? `s` : ``), inline: true }] : [])
         ],
+        timestamp: timestamp ? new Date(timestamp).toISOString() : undefined,
         thumbnail: { url: `attachment://${gameObject.icon}.png` },
         color: (count < gameObject.count ? 0xb0b0b0 : 0x5d9d15)
       }
-    ]
+    ],
+    components: timestamp ? [
+      {
+        type: 1,
+        components: [
+          { type: 2, style: range === 1 ? 1 : 2, custom_id: `peak_1_${mode}.${gameObject.name}`, label: '1 Hour' },
+          { type: 2, style: range === 6 ? 1 : 2, custom_id: `peak_6_${mode}.${gameObject.name}`, label: '6 Hours' },
+          { type: 2, style: range === 12 ? 1 : 2, custom_id: `peak_12_${mode}.${gameObject.name}`, label: '12 Hours' },
+          { type: 2, style: range === 24 ? 1 : 2, custom_id: `peak_24_${mode}.${gameObject.name}`, label: '24 Hours' }
+        ]
+      }
+    ] : undefined
   };
 }
 
 export function queueMessage(role, everyone, gameObject, count) {
-  return buildFormData(queueMessageContent(role, everyone, gameObject, count), `./assets/icons/${gameObject.icon}.png`, `${gameObject.icon}.png`);
+  return buildFormData(queueMessageContent(role, everyone, null, gameObject, count, null, null), `./assets/icons/${gameObject.icon}.png`, `${gameObject.icon}.png`);
 }
 
-export function queueInteractionMessage(gameObject, count) {
+export function queueInteractionMessage(mode, gameObject, count, timestamp, range) {
   return buildFormData({
     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-    data: queueMessageContent(null, false, gameObject, count)
+    data: queueMessageContent(null, false, mode, gameObject, count, timestamp, range)
+  }, `./assets/icons/${gameObject.icon}.png`, `${gameObject.icon}.png`);
+}
+
+export function queueInteractionEditMessage(mode, gameObject, count, timestamp, range) {
+  return buildFormData({
+    type: InteractionResponseType.UPDATE_MESSAGE,
+    data: queueMessageContent(null, false, mode, gameObject, count, timestamp, range)
   }, `./assets/icons/${gameObject.icon}.png`, `${gameObject.icon}.png`);
 }
 
@@ -66,6 +85,25 @@ export const CHANNEL_IN_USE = (game) => errorMessage(`Channel already in use`, `
 export const CHANNEL_NOT_IN_USE = errorMessage(`Channel not in use`, `This channel is not receiving notifications.`);
 export const INVALID_GAME = (game) => errorMessage(`Invalid game`, `**${game}** is not a valid game.`);
 export const NO_GAME_SELECTED = (mode) => errorMessage(`No default set for ${mode}`, `No game was specified and no default is set for **${mode}**.`);
+
+function errorMessageEdit(title, description) {
+  return buildFormData({
+    type: InteractionResponseType.UPDATE_MESSAGE,
+    data: {
+      embeds: [
+        {
+          title: title,
+          description: description,
+          thumbnail: { url: `attachment://barrier.png` },
+          color: 0x565461
+        }
+      ],
+      flags: InteractionResponseFlags.EPHEMERAL
+    }
+  }, `./assets/icons/barrier.png`, `barrier.png`);
+}
+
+export const INVALID_GAME_EDIT = (game) => errorMessageEdit(`Invalid game`, `**${game}** is not a valid game.`);
 
 function statusMessage(title, description, icon) {
   return buildFormData({

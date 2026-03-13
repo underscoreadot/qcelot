@@ -1,14 +1,32 @@
+import { recordPeakCounts } from './state.js';
+
 const API_KEY = process.env.HYPIXEL_API_KEY;
 
 let games = null;
+let peaks = null;
 
-setInterval(async () => {
-  try {
-    games = await getGameCounts();
-  } catch (err) {
-    console.error("Error fetching queue details:", err);
-  }
-}, 1500);
+setTimeout(async () => {  
+  setInterval(async () => {
+    const timestamp = Math.floor(Date.now() / 1500) * 1500;
+
+    try {
+      games = await getGameCounts();
+
+      if (timestamp % 60000 === 0) {
+        if (peaks) recordPeakCounts(timestamp - 60000, peaks);
+        peaks = JSON.parse(JSON.stringify(games));
+      }
+      else if (peaks) {
+        for (const [mode, modeData] of Object.entries(games))
+          for (const [game, count] of Object.entries(modeData.modes ?? {}))
+            if (count > peaks[mode].modes[game])
+              peaks[mode].modes[game] = count;
+      }
+    } catch (err) {
+      console.error("Error fetching queue details:", err);
+    }
+  }, 1500);
+}, 60000 - (Date.now() % 60000));
 
 async function getGameCounts() {
   const res = await fetch(
@@ -29,4 +47,8 @@ async function getGameCounts() {
 
 export function getCachedGameCount(mode, game) {
     return games?.[mode]?.modes?.[game] ?? 0;
+}
+
+export function getCachedPeakCount(mode, game) {
+    return peaks?.[mode]?.modes?.[game] ?? 0;
 }

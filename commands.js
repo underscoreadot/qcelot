@@ -50,6 +50,14 @@ const CHECK_COMMAND = {
   contexts: [0, 1, 2],
 };
 
+const PEAK_COMMAND = {
+  name: 'peak',
+  description: 'Check peak player counts',
+  options: createModeSubcommands([], `Check the peak player counts for `, ``, `Game to check`),
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+};
+
 const WATCH_COMMAND = {
   name: 'watch',
   description: 'Watch player counts and receive automatic notifications',
@@ -87,6 +95,6 @@ const WATCH_COMMAND = {
   contexts: [0, 1],
 };
 
-const ALL_COMMANDS = [HELP_COMMAND, DEFAULT_COMMAND, CHECK_COMMAND, WATCH_COMMAND];
+const ALL_COMMANDS = [HELP_COMMAND, DEFAULT_COMMAND, CHECK_COMMAND, PEAK_COMMAND, WATCH_COMMAND];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);

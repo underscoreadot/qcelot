@@ -32,6 +32,14 @@ database.exec(`
   );
 
   CREATE INDEX IF NOT EXISTS index_watchers_guildId ON watchers(guildId);
+
+  CREATE TABLE IF NOT EXISTS peaks (
+    mode TEXT NOT NULL,
+    game TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    count INTEGER NOT NULL,
+    PRIMARY KEY (mode, game, timestamp)
+  );
 `);
 
 export function isUserPremium(userId) {
@@ -88,4 +96,20 @@ export async function loadWatchers() {
       console.error(`Failed to restore watcher for ${row.channelId}`, err);
     }
   }
+}
+
+export function recordPeakCounts(timestamp, peaks) {
+  const stmt = database.prepare('INSERT OR IGNORE INTO peaks (mode, game, timestamp, count) VALUES (?, ?, ?, ?)');
+
+  for (const [mode, modeData] of Object.entries(peaks))
+    for (const [game, count] of Object.entries(modeData.modes ?? {}))
+      stmt.run(mode, game, timestamp, count);
+
+  database.prepare('DELETE FROM peaks WHERE timestamp < ?').run(timestamp - 24 * 60 * 60 * 1000);
+}
+
+export function getPeak(mode, game, timestamp, range) {
+  const result = database.prepare('SELECT count, timestamp FROM peaks WHERE mode = ? AND game = ? AND timestamp >= ? ORDER BY count DESC, timestamp DESC LIMIT 1').get(mode, game, timestamp - range * 60 * 60 * 1000);
+  
+  return result ? { count: result.count, timestamp: result.timestamp } : { count: 0, timestamp: 0 };
 }

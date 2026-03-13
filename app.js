@@ -3,9 +3,9 @@ import express from 'express';
 import { InteractionResponseType, InteractionType, verifyKeyMiddleware } from 'discord-interactions';
 
 import { modesMap, gamesChoices, gamesMap } from './data.js';
-import { getCachedGameCount } from "./hypixel.js";
-import { isUserPremium, isUserBlacklisted, addDefault, removeDefault, getDefault, addWatcher, removeWatcher, getWatcherGame, getWatcherCount, loadWatchers } from './state.js';
-import { queueInteractionMessage, HELP, USER_BLACKLISTED, GUILD_WATCHER_LIMIT, CHANNEL_IN_USE, CHANNEL_NOT_IN_USE, INVALID_GAME, NO_GAME_SELECTED, STARTED_WATCHING, STOPPED_WATCHING, DEFAULT_SET, DEFAULT_RESET } from './messages.js';
+import { getCachedGameCount, getCachedPeakCount } from "./hypixel.js";
+import { isUserPremium, isUserBlacklisted, addDefault, removeDefault, getDefault, addWatcher, removeWatcher, getWatcherGame, getWatcherCount, loadWatchers, getPeak } from './state.js';
+import { queueInteractionMessage, queueInteractionEditMessage, HELP, USER_BLACKLISTED, GUILD_WATCHER_LIMIT, CHANNEL_IN_USE, CHANNEL_NOT_IN_USE, INVALID_GAME, INVALID_GAME_EDIT, NO_GAME_SELECTED, STARTED_WATCHING, STOPPED_WATCHING, DEFAULT_SET, DEFAULT_RESET } from './messages.js';
 import { sendFormData } from "./utils.js";
 
 // Create an express app
@@ -54,6 +54,29 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
         choices: gamesChoices.get(subcommand.name)?.filter(choice => choice.name.toLowerCase().includes(userInput))?.slice(0, 25) ?? []
       }
     });
+  }
+
+  if (type === InteractionType.MESSAGE_COMPONENT) {
+    const [action, range, modeGame] = data.custom_id.split('_');
+
+    if (action === 'peak') {
+      const [mode, game] = modeGame.split('.');
+
+      const modeObject = modesMap.get(mode);
+      const gameObject = gamesMap.get(mode).get(game);
+
+      if (!gameObject) return await sendFormData(res, INVALID_GAME_EDIT(game));
+
+      const timestamp = Math.floor(Date.now() / 60000) * 60000;
+
+      const peak = getPeak(modeObject.api, gameObject.api, timestamp, parseInt(range));
+
+      if (getCachedPeakCount(modeObject.api, gameObject.api) > peak.count) peak = { count: getCachedPeakCount(modeObject.api, gameObject.api), timestamp };
+
+      return await sendFormData(res, queueInteractionEditMessage(mode, gameObject, peak.count, peak.timestamp, parseInt(range)));
+    }
+
+    return res.status(400).json({ error: 'unknown component' });
   }
 
   /**
@@ -109,7 +132,31 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
       const count = getCachedGameCount(modeObject.api, gameObject.api);
 
-      return await sendFormData(res, queueInteractionMessage(gameObject, count));
+      return await sendFormData(res, queueInteractionMessage(mode, gameObject, count, null, null));
+    }
+
+    // "peak" command
+    if (name === 'peak') {
+      const subcommand = options[0];
+
+      const mode = subcommand.name;
+      const game = subcommand.options?.find(o => o.name === 'game')?.value ?? getDefault(guild_id ?? channel_id, mode);
+
+      const modeObject = modesMap.get(mode);
+
+      if (!game) return await sendFormData(res, NO_GAME_SELECTED(modeObject.name));
+
+      const gameObject = gamesMap.get(mode).get(game);
+
+      if (!gameObject) return await sendFormData(res, INVALID_GAME(game));
+
+      const timestamp = Math.floor(Date.now() / 60000) * 60000;
+
+      const peak = getPeak(modeObject.api, gameObject.api, timestamp, 1);
+
+      if (getCachedPeakCount(modeObject.api, gameObject.api) > peak.count) peak = { count: getCachedPeakCount(modeObject.api, gameObject.api), timestamp };
+
+      return await sendFormData(res, queueInteractionMessage(mode, gameObject, peak.count, peak.timestamp, 1));
     }
 
     // "watch" command
