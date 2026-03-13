@@ -69,7 +69,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
       const timestamp = Math.floor(Date.now() / 60000) * 60000;
 
-      const peak = getPeak(modeObject.api, gameObject.api, timestamp, parseInt(range));
+      let peak = getPeak(modeObject.api, gameObject.api, timestamp, parseInt(range));
 
       if (getCachedPeakCount(modeObject.api, gameObject.api) > peak.count) peak = { count: getCachedPeakCount(modeObject.api, gameObject.api), timestamp };
 
@@ -152,7 +152,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
       const timestamp = Math.floor(Date.now() / 60000) * 60000;
 
-      const peak = getPeak(modeObject.api, gameObject.api, timestamp, 1);
+      let peak = getPeak(modeObject.api, gameObject.api, timestamp, 1);
 
       if (getCachedPeakCount(modeObject.api, gameObject.api) > peak.count) peak = { count: getCachedPeakCount(modeObject.api, gameObject.api), timestamp };
 
