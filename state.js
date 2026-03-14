@@ -106,7 +106,7 @@ export function recordPeakCounts(timestamp, peaks) {
     for (const game of gamesList) {
       const modeApi = modesMap.get(mode).api;
       const gameApi = game.api;
-      const count = peaks?.[mode]?.modes?.[game];
+      const count = peaks?.[modeApi]?.modes?.[gameApi];
 
       if (count) stmt.run(modeApi, gameApi, timestamp, count);
     }
