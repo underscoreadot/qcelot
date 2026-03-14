@@ -108,7 +108,7 @@ export function recordPeakCounts(timestamp, peaks) {
       const gameApi = game.api;
       const count = peaks?.[modeApi]?.modes?.[gameApi];
 
-      if (count) stmt.run(modeApi, gameApi, timestamp, count);
+      if (count !== null) stmt.run(modeApi, gameApi, timestamp, count);
     }
 
   database.prepare('DELETE FROM peaks WHERE timestamp < ?').run(timestamp - 24 * 60 * 60 * 1000);
