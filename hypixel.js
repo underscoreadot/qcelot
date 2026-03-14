@@ -1,28 +1,29 @@
+import { games, modesMap } from './data.js';
 import { recordPeakCounts } from './state.js';
 
 const API_KEY = process.env.HYPIXEL_API_KEY;
 
-let games = null;
-let peaks = null;
+let gameCounts = null;
+let peakCounts = null;
 
 setTimeout(async () => {  
   setInterval(async () => {
     const timestamp = Math.floor(Date.now() / 1500) * 1500;
 
     try {
-      games = await getGameCounts();
+      gameCounts = await getGameCounts();
 
       if (timestamp % 60000 === 0) {
-        if (peaks) recordPeakCounts(timestamp - 60000, peaks);
-        peaks = JSON.parse(JSON.stringify(games));
+        if (peakCounts) recordPeakCounts(timestamp - 60000, peakCounts);
+        newPeakCounts();
       }
-      else if (peaks) {
-        for (const [mode, modeData] of Object.entries(games))
+      else if (peakCounts) {
+        for (const [mode, modeData] of Object.entries(peakCounts))
           for (const [game, count] of Object.entries(modeData.modes ?? {}))
-            if (count > peaks[mode].modes[game])
-              peaks[mode].modes[game] = count;
+            if (getCachedGameCount(mode, game) > count)
+              peakCounts[mode].modes[game] = getCachedGameCount(mode, game);
       }
-      else peaks = JSON.parse(JSON.stringify(games));
+      else newPeakCounts();
     } catch (err) {
       console.error("Error fetching queue details:", err);
     }
@@ -47,9 +48,25 @@ async function getGameCounts() {
 }
 
 export function getCachedGameCount(mode, game) {
-    return games?.[mode]?.modes?.[game] ?? 0;
+  return gameCounts?.[mode]?.modes?.[game] ?? 0;
 }
 
 export function getCachedPeakCount(mode, game) {
-    return peaks?.[mode]?.modes?.[game] ?? 0;
+  return peakCounts?.[mode]?.modes?.[game] ?? 0;
+}
+
+function newPeakCounts() {
+  peakCounts = {};
+
+  for (const [mode, gamesList] of Object.entries(games)) {
+    const modeApi = modesMap.get(mode).api;
+
+    peakCounts[modeApi] = { modes: {} };
+
+    for (const game of gamesList) {
+      const gameApi = game.api;
+
+      peakCounts[modeApi].modes[gameApi] = getCachedGameCount(modeApi, gameApi);
+    }
+  }
 }
