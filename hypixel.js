@@ -26,7 +26,7 @@ setTimeout(async () => {
       console.error("Error fetching queue details:", err);
     }
   }, 1500);
-}, 60000 - (Date.now() % 60000));
+}, 1500 - (Date.now() % 1500));
 
 async function getGameCounts() {
   const res = await fetch(
