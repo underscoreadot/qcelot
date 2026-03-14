@@ -111,5 +111,5 @@ export function recordPeakCounts(timestamp, peaks) {
 export function getPeak(mode, game, timestamp, range) {
   const result = database.prepare('SELECT count, timestamp FROM peaks WHERE mode = ? AND game = ? AND timestamp >= ? ORDER BY count DESC, timestamp DESC LIMIT 1').get(mode, game, timestamp - range * 60 * 60 * 1000);
   
-  return result ? { count: result.count, timestamp: result.timestamp } : { count: 0, timestamp: 0 };
+  return result ? { count: result.count, timestamp: result.timestamp } : { count: 0, timestamp };
 }
