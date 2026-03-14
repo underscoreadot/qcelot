@@ -19,7 +19,7 @@ export const modes = [
 
 export const modesMap = new Map(modes.map(mode => [mode.mode, { name: mode.name, api: mode.api, icon: mode.icon }]));
 
-const games = {
+export const games = {
   arcade: [
     { name: 'Blocking Dead', api: 'DAYONE', icon: 'rotten_flesh', count: 9 },
     { name: 'Bounty Hunters', api: 'ONEINTHEQUIVER', icon: 'bow', count: 6 },
