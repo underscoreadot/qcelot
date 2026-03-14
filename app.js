@@ -61,7 +61,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
     if (action === 'peak') {
       const modeObject = modesMap.get(mode);
-      const gameObject = gamesMap.get(mode).get(game);
+      const gameObject = gamesMap.get(mode)?.get(game);
 
       if (!gameObject) return await sendFormData(res, INVALID_GAME_EDIT(game));
 

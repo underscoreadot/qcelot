@@ -105,7 +105,7 @@ export function recordPeakCounts(timestamp, peakCounts) {
     for (const [game, count] of Object.entries(modeData.modes ?? {}))
       stmt.run(mode, game, timestamp, count);
 
-  database.prepare('DELETE FROM peaks WHERE timestamp < ?').run(timestamp - 24 * 60 * 60 * 1000);
+  database.prepare('DELETE FROM peaks WHERE timestamp < ?').run(timestamp - 48 * 60 * 60 * 1000);
 }
 
 export function getPeak(mode, game, timestamp, range) {
