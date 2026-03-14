@@ -6,12 +6,11 @@ function queueMessageContent(role, everyone, mode, gameObject, count, timestamp,
     content: role ? (everyone ? `@everyone` : `<@&${role}>`) : undefined,
     embeds: [
       {
-        title: `${gameObject.name} ` + (timestamp ? `was ` : `is `) + (count < gameObject.count ? `not ` : ``) + `queueing`,
+        title: `${gameObject.name} ` + (timestamp ? `was ` : `is `) + (count < gameObject.count ? `not ` : ``) + `queueing at ` +  `<t:${Math.floor(timestamp / 1000)}:t>`,
         fields: [
           { name: `Count`, value: `${count} player` + (count !== 1 ? `s` : ``), inline: true },
           ...(count < gameObject.count ? [{ name: `Threshold`, value: `${gameObject.count} player` + (gameObject.count !== 1 ? `s` : ``), inline: true }] : [])
         ],
-        timestamp: timestamp ? new Date(timestamp).toISOString() : undefined,
         thumbnail: { url: `attachment://${gameObject.icon}.png` },
         color: (count < gameObject.count ? 0xb0b0b0 : 0x5d9d15)
       }
