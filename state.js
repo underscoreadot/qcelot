@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3';
 
+import { games, modesMap } from './data.js';
 import { watchQueue } from './watch.js';
 
 const watchers = new Map();
@@ -101,9 +102,14 @@ export async function loadWatchers() {
 export function recordPeakCounts(timestamp, peaks) {
   const stmt = database.prepare('INSERT OR IGNORE INTO peaks (mode, game, timestamp, count) VALUES (?, ?, ?, ?)');
 
-  for (const [mode, modeData] of Object.entries(peaks))
-    for (const [game, count] of Object.entries(modeData.modes ?? {}))
-      stmt.run(mode, game, timestamp, count);
+  for (const [mode, gamesList] of Object.entries(games))
+    for (const game of gamesList) {
+      const modeApi = modesMap.get(mode).api;
+      const gameApi = game.api;
+      const count = peaks?.[mode]?.modes?.[game];
+
+      if (count) stmt.run(modeApi, gameApi, timestamp, count);
+    }
 
   database.prepare('DELETE FROM peaks WHERE timestamp < ?').run(timestamp - 24 * 60 * 60 * 1000);
 }
