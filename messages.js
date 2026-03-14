@@ -54,7 +54,7 @@ export const HELP = buildFormData({
     embeds: [
       {
         title: `Qcelot`,
-        description: `Qcelot monitors player counts for most games on the Hypixel network. Use \`/check\` to view the current count for a game, \`/watch\` to configure notifications for when a count reaches a certain threshold, and \`/default\` to save a per-server default game for each mode. For additional help and updates, join the [official support server](https://qcelot.app/discord).`,
+        description: `Qcelot monitors player counts for most games on the Hypixel network. Use \`/check\` to view the current count for a game, \`/peak\` to view peak counts for a game, \`/watch\` to configure notifications for when a count reaches a certain threshold. For additional help and updates, join the [official support server](https://qcelot.app/discord).`,
         thumbnail: { url: `attachment://qcelot.png` },
         color: 0xeaeae8
       }
