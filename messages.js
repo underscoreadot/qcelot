@@ -86,27 +86,6 @@ export const CHANNEL_NOT_IN_USE = errorMessage(`Channel not in use`, `This chann
 export const INVALID_GAME = (game) => errorMessage(`Invalid game`, `**${game}** is not a valid game.`);
 export const NO_GAME_SELECTED = (mode) => errorMessage(`No default set for ${mode}`, `No game was specified and no default is set for **${mode}**.`);
 
-function errorMessageEdit(title, description) {
-  return buildFormData({
-    type: InteractionResponseType.UPDATE_MESSAGE,
-    data: {
-      embeds: [
-        {
-          title: title,
-          description: description,
-          thumbnail: { url: `attachment://barrier.png` },
-          color: 0x565461
-        }
-      ],
-      components: [],
-      attachments: [],
-      flags: InteractionResponseFlags.EPHEMERAL
-    }
-  }, `./assets/icons/barrier.png`, `barrier.png`);
-}
-
-export const INVALID_GAME_EDIT = (game) => errorMessageEdit(`Invalid game`, `**${game}** is not a valid game.`);
-
 function statusMessage(title, description, icon) {
   return buildFormData({
     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,

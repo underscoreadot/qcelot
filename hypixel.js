@@ -1,8 +1,6 @@
 import { games, modesMap } from './data.js';
 import { recordPeakCounts } from './state.js';
 
-const API_KEY = process.env.HYPIXEL_API_KEY;
-
 let gameCounts = null;
 let peakCounts = null;
 
@@ -20,8 +18,7 @@ setTimeout(async () => {
       else if (peakCounts) {
         for (const [mode, modeData] of Object.entries(peakCounts))
           for (const [game, count] of Object.entries(modeData.modes ?? {}))
-            if (getCachedGameCount(mode, game) > count)
-              peakCounts[mode].modes[game] = getCachedGameCount(mode, game);
+            if (getCachedGameCount(mode, game) > count) peakCounts[mode].modes[game] = getCachedGameCount(mode, game);
       }
       else newPeakCounts();
     } catch (err) {
@@ -31,18 +28,13 @@ setTimeout(async () => {
 }, 1500 - (Date.now() % 1500));
 
 async function getGameCounts() {
-  const res = await fetch(
-    `https://api.hypixel.net/v2/counts?key=${API_KEY}`
-  );
+  const res = await fetch(`https://api.hypixel.net/v2/counts?key=${process.env.HYPIXEL_API_KEY}`);
 
-  if (!res.ok) {
-    throw new Error(`Hypixel API error: ${res.status}`);
-  }
+  if (!res.ok) throw new Error(`Hypixel API error: ${res.status}`);
 
   const data = await res.json();
-  if (!data.success) {
-    throw new Error("Hypixel API returned success=false");
-  }
+
+  if (!data.success) throw new Error("Hypixel API returned success=false");
 
   return data.games;
 }

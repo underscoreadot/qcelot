@@ -5,7 +5,7 @@ import { InteractionResponseType, InteractionType, verifyKeyMiddleware } from 'd
 import { modesMap, gamesChoices, gamesMap } from './data.js';
 import { getCachedGameCount, getCachedPeakCount } from "./hypixel.js";
 import { isUserPremium, isUserBlacklisted, addDefault, removeDefault, getDefault, addWatcher, removeWatcher, getWatcherGame, getWatcherCount, loadWatchers, getPeak } from './state.js';
-import { queueInteractionMessage, queueInteractionEditMessage, HELP, USER_BLACKLISTED, GUILD_WATCHER_LIMIT, CHANNEL_IN_USE, CHANNEL_NOT_IN_USE, INVALID_GAME, INVALID_GAME_EDIT, NO_GAME_SELECTED, STARTED_WATCHING, STOPPED_WATCHING, DEFAULT_SET, DEFAULT_RESET } from './messages.js';
+import { queueInteractionMessage, queueInteractionEditMessage, HELP, USER_BLACKLISTED, GUILD_WATCHER_LIMIT, CHANNEL_IN_USE, CHANNEL_NOT_IN_USE, INVALID_GAME, NO_GAME_SELECTED, STARTED_WATCHING, STOPPED_WATCHING, DEFAULT_SET, DEFAULT_RESET } from './messages.js';
 import { sendFormData } from "./utils.js";
 
 // Create an express app
@@ -63,7 +63,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       const modeObject = modesMap.get(mode);
       const gameObject = gamesMap.get(mode)?.get(game);
 
-      if (!gameObject) return await sendFormData(res, INVALID_GAME_EDIT(game));
+      if (!gameObject) return await sendFormData(res, INVALID_GAME(game));
 
       const timestamp = Math.floor(Date.now() / 60000) * 60000;
 
