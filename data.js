@@ -62,6 +62,8 @@ export const games = {
     { name: 'Solo', api: 'BEDWARS_EIGHT_ONE', icon: 'bed', count: 7 },
     { name: 'Swappage 4v4v4v4', api: 'BEDWARS_FOUR_FOUR_SWAP', icon: 'end_portal_frame', count: 14 },
     { name: 'Swappage Doubles', api: 'BEDWARS_EIGHT_TWO_SWAP', icon: 'end_portal_frame', count: 14 },
+    { name: 'Totally Normal 4v4v4v4', api: 'BEDWARS_FOUR_FOUR_TOTALLYNORMAL', icon: 'emerald', count: 14 },
+    { name: 'Totally Normal Doubles', api: 'BEDWARS_EIGHT_TWO_TOTALLYNORMAL', icon: 'emerald', count: 14 },
     { name: 'Ultimate 4v4v4v4', api: 'BEDWARS_FOUR_FOUR_ULTIMATE', icon: 'nether_star', count: 14 },
     { name: 'Ultimate Doubles', api: 'BEDWARS_EIGHT_TWO_ULTIMATE', icon: 'nether_star', count: 14 },
     { name: 'Underworld 4v4v4v4', api: 'BEDWARS_FOUR_FOUR_UNDERWORLD', icon: 'skeleton_skull', count: 14 },
