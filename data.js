@@ -27,7 +27,7 @@ export const games = {
     { name: 'Disasters', api: 'DISASTERS', icon: 'lava_bucket', count: 12 },
     { name: 'Dragon Wars', api: 'DRAGONWARS2', icon: 'dragon_egg', count: 5 },
     { name: 'Dropper', api: 'DROPPER', icon: 'hopper', count: 10 },
-    { name: 'Easter Simulator', api: 'EASTER_SIMULATOR', icon: 'player_head_easter_egg', count: 8 },
+    { name: 'Easter Simulator', api: 'EASTER_SIMULATOR', icon: 'player_head_easter_egg', count: 6 },
     { name: 'Ender Spleef', api: 'ENDER', icon: 'ender_pearl', count: 5 },
     { name: 'Farm Hunt', api: 'FARM_HUNT', icon: 'sheep_spawn_egg', count: 11 },
     { name: 'Football', api: 'SOCCER', icon: 'player_head_football', count: 5 },
