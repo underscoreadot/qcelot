@@ -58,7 +58,7 @@ function newPeakCounts() {
     for (const game of gamesList) {
       const gameApi = game.api;
 
-      peakCounts[modeApi].modes[gameApi] = getCachedGameCount(modeApi, gameApi);
+      if (gameCounts?.[modeApi]?.modes?.[gameApi]) peakCounts[modeApi].modes[gameApi] = getCachedGameCount(modeApi, gameApi);
     }
   }
 }
