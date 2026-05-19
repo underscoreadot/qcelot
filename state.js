@@ -13,6 +13,11 @@ database.exec(`
     blacklisted INTEGER NOT NULL DEFAULT 0
   );
 
+  CREATE TABLE IF NOT EXISTS guilds (
+    guildId TEXT PRIMARY KEY,
+    blacklisted INTEGER NOT NULL DEFAULT 0
+  );
+
   CREATE TABLE IF NOT EXISTS defaults (
     scopeId TEXT NOT NULL,
     mode TEXT NOT NULL,
@@ -48,6 +53,10 @@ export function isUserPremium(userId) {
 
 export function isUserBlacklisted(userId) {
   return database.prepare('SELECT blacklisted FROM users WHERE userId = ?').get(userId)?.blacklisted === 1;
+}
+
+export function isGuildBlacklisted(userId) {
+  return database.prepare('SELECT blacklisted FROM guilds WHERE guildId = ?').get(userId)?.blacklisted === 1;
 }
 
 export function addDefault(scopeId, mode, game) {
