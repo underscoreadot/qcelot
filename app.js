@@ -34,7 +34,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
   if (isUserBlacklisted(userId)) return await sendFormData(res, USER_BLACKLISTED);
 
-  if (isGuildBlacklisted(guild_id)) return await sendFormData(res, GUILD_BLACKLISTED);
+  if (guild_id && isGuildBlacklisted(guild_id)) return await sendFormData(res, GUILD_BLACKLISTED);
 
   if (type === InteractionType.APPLICATION_COMMAND_AUTOCOMPLETE) {
     const subcommand = data.options[0];

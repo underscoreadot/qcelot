@@ -55,8 +55,8 @@ export function isUserBlacklisted(userId) {
   return database.prepare('SELECT blacklisted FROM users WHERE userId = ?').get(userId)?.blacklisted === 1;
 }
 
-export function isGuildBlacklisted(userId) {
-  return database.prepare('SELECT blacklisted FROM guilds WHERE guildId = ?').get(userId)?.blacklisted === 1;
+export function isGuildBlacklisted(guildId) {
+  return database.prepare('SELECT blacklisted FROM guilds WHERE guildId = ?').get(guildId)?.blacklisted === 1;
 }
 
 export function addDefault(scopeId, mode, game) {
@@ -100,6 +100,10 @@ export function getWatcherCount(guildId) {
 export async function loadWatchers() {
   for (const row of database.prepare('SELECT * FROM watchers').all()) {
     try {
+      if (isUserBlacklisted(row.userId) || (row.guildId && isGuildBlacklisted(row.guildId))) {
+        removeWatcher(row.channelId);
+        continue;
+      }
       watchers.set(row.channelId, watchQueue(row.channelId, row.guildId, row.mode, row.game, row.role, row.countThreshold, row.delay));
     } catch (err) {
       console.error(`Failed to restore watcher for ${row.channelId}`, err);
